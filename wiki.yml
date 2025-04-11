@@ -1,34 +1,34 @@
-version: '3.8'
+version: '3.3'
 
 services:
-  db:
-    image: mariadb:latest
-    container_name: mediawiki-db
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: Test123  # Укажите свой пароль
-      MYSQL_DATABASE: mediawiki
-      MYSQL_USER: wikiuser
-      MYSQL_PASSWORD: Test123  # Укажите свой пароль
-    volumes:
-      - db_data:/var/lib/mysql
-
   mediawiki:
     image: mediawiki:latest
     container_name: mediawiki
-    restart: always
     ports:
       - "8080:80"
     depends_on:
-      - db
-    environment:
-      MEDIAWIKI_DB_HOST: db
-      MEDIAWIKI_DB_USER: wiki
-      MEDIAWIKI_DB_PASSWORD: WikiP@ssw0rd
-      MEDIAWIKI_DB_NAME: mediawiki
+      - mariadb
     volumes:
-      - mediawiki_images:/var/www/html/images
+      - mediawiki-data:/var/www/html
+    environment:
+      - MEDIAWIKI_DB_HOST=mariadb
+      - MEDIAWIKI_DB_USER=wiki
+      - MEDIAWIKI_DB_PASSWORD=wikiP@ssword
+      - MEDIAWIKI_DB_NAME=wikidb
+    restart: unless-stopped
+
+  mariadb:
+    image: mariadb:latest
+    container_name: mariadb
+    environment:
+      - MYSQL_DATABASE=wikidb
+      - MYSQL_USER=wiki
+      - MYSQL_PASSWORD=wikiP@ssword
+      - MYSQL_ROOT_PASSWORD=wikiRootP@ssword
+    volumes:
+      - mariadb-data:/var/lib/mysql
+    restart: unless-stopped
 
 volumes:
-  db_data:
-  mediawiki_images:
+  mediawiki-data:
+  mariadb-data:
