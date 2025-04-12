@@ -1,4 +1,4 @@
-version: '3.3'
+version: '3.7'
 
 services:
   mediawiki:
@@ -7,26 +7,32 @@ services:
     ports:
       - "8080:80"
     depends_on:
-      - mariadb
+      mariadb:
+        condition: service_healthy
     volumes:
       - mediawiki-data:/var/www/html
     environment:
       - MEDIAWIKI_DB_HOST=mariadb
       - MEDIAWIKI_DB_USER=wiki
-      - MEDIAWIKI_DB_PASSWORD=wikiP@ssword
+      - MEDIAWIKI_DB_PASSWORD=wikiP@ssw0rd
       - MEDIAWIKI_DB_NAME=wikidb
     restart: unless-stopped
 
   mariadb:
-    image: mariadb:latest
+    image: mariadb:10.4
     container_name: mariadb
     environment:
       - MYSQL_DATABASE=wikidb
       - MYSQL_USER=wiki
-      - MYSQL_PASSWORD=wikiP@ssword
-      - MYSQL_ROOT_PASSWORD=wikiRootP@ssword
+      - MYSQL_PASSWORD=wikiP@ssw0rd
+      - MYSQL_ROOT_PASSWORD=wikiRootP@ssw0rd
     volumes:
       - mariadb-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     restart: unless-stopped
 
 volumes:
